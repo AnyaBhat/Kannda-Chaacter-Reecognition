@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@1,8..60,600&display=swap"
+        rel="stylesheet">
+    <title>Kannada Character Prediction</title>
+</head>
+
+<body>
+
+    <div class="topnav" id="myTopnav">
+        <a href="#" id="logo" >
+            AksharaNetra
+        </a>
+        <a href="#home" class="active">Home</a>
+        <a href="about.html">About</a>
+        <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+        </a>
+    </div>
+
+    <div class="content-box">
+        <div>
+            <h1>Kannada Character Prediction</h1>
+
+            <label for="imageInput">Upload Single character Image:</label>
+            <input type="file" id="imageInput" accept="image/*" onchange="displayImage(this)">
+
+            <button onclick="predictCharacter()">Predict Character</button>
+
+            <div class="or-text">OR</div>
+
+            <label for="labeledImageInput">Upload document Image:</label>
+            <input type="file" id="labeledImageInput" accept="image/*" onchange="displayImage(this)">
+
+            <button onclick="predictLabeled()">Predict Document</button>
+
+            <img id="uploadedImage" src=" " alt="Uploaded Image">
+            <div id="output"></div>
+        </div>
+
+        <footer>
+            &copy; 2023 Kannada Character Prediction
+        </footer>
+    </div>
+    <script>
+        function displayImage(input) {
+            var file = input.files[0];
+
+            if (file) {
+                var imgElement = document.getElementById('uploadedImage');
+                imgElement.src = URL.createObjectURL(file);
+                imgElement.style.display = 'block';
+            }
+        }
+
+        function predictCharacter() {
+            var input = document.getElementById('imageInput');
+            var file = input.files[0];
+
+            if (file) {
+
+                var formData = new FormData();
+                formData.append('image', file);
+
+                fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data);
+                        document.getElementById('output').innerText = `Predicted Character: ${data.predicted_char} \n Predicted Class: ${data.predicted_class}`;
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                alert('Please select an image file.');
+            }
+        }
+
+        function predictLabeled() {
+            var labeledInput = document.getElementById('labeledImageInput');
+            var labeledFile = labeledInput.files[0];
+
+            if (labeledFile) {
+
+                var formData = new FormData();
+                formData.append('image', labeledFile);
+
+                fetch('http://127.0.0.1:5000/predict_labeled', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(data);
+                        document.getElementById('output').innerText = `\t\t\tPredicted Text:\n ${data.predicted_text}`;
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                alert('Please select a labeled image file.');
+            }
+        }
+
+        function myFunction() {
+            var x = document.getElementById("myTopnav");
+            if (x.className === "topnav") {
+                x.className += " responsive";
+            } else {
+                x.className = "topnav";
+            }
+        }
+    </script>
+</body>
+
+</html>
